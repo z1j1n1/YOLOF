@@ -8,6 +8,13 @@ from cvpods.modeling.nn_utils import weight_init
 
 from .utils import get_activation, get_norm
 
+"""
+Dilated Encoder HERE
+三个使用cspdarknet53 backbone的ENCODER参数相同
+添加到YOLOv5需要确定的细节
+(0) 替换SPP还是P5->Dilated Encoder->Detect
+(1) 使用BLOCK_DILATIONS的值(不同backbone使用的不同)
+"""
 
 class DilatedEncoder(nn.Module):
     """
@@ -22,14 +29,14 @@ class DilatedEncoder(nn.Module):
     def __init__(self, cfg, input_shape: List[ShapeSpec]):
         super(DilatedEncoder, self).__init__()
         # fmt: off
-        self.backbone_level = cfg.MODEL.YOLOF.ENCODER.IN_FEATURES
-        self.in_channels = input_shape[self.backbone_level[0]].channels
-        self.encoder_channels = cfg.MODEL.YOLOF.ENCODER.NUM_CHANNELS
-        self.block_mid_channels = cfg.MODEL.YOLOF.ENCODER.BLOCK_MID_CHANNELS
-        self.num_residual_blocks = cfg.MODEL.YOLOF.ENCODER.NUM_RESIDUAL_BLOCKS
-        self.block_dilations = cfg.MODEL.YOLOF.ENCODER.BLOCK_DILATIONS
-        self.norm_type = cfg.MODEL.YOLOF.ENCODER.NORM
-        self.act_type = cfg.MODEL.YOLOF.ENCODER.ACTIVATION
+        self.backbone_level = cfg.MODEL.YOLOF.ENCODER.IN_FEATURES #["res5"]
+        self.in_channels = input_shape[self.backbone_level[0]].channels #1024?
+        self.encoder_channels = cfg.MODEL.YOLOF.ENCODER.NUM_CHANNELS #512
+        self.block_mid_channels = cfg.MODEL.YOLOF.ENCODER.BLOCK_MID_CHANNELS #128
+        self.num_residual_blocks = cfg.MODEL.YOLOF.ENCODER.NUM_RESIDUAL_BLOCKS #8
+        self.block_dilations = cfg.MODEL.YOLOF.ENCODER.BLOCK_DILATIONS #[1,2,3,4,5,6,7,8]
+        self.norm_type = cfg.MODEL.YOLOF.ENCODER.NORM #"SyncBN"
+        self.act_type = cfg.MODEL.YOLOF.ENCODER.ACTIVATION #"LeakyReLU"
         # fmt: on
         assert len(self.block_dilations) == self.num_residual_blocks
 
